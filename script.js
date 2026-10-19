@@ -1,3 +1,4 @@
+// 基本互動與產生評語邏輯 (繁體中文)，1–10 分制，正向、鼓勵性回饋
 (function(){
   const stargetInput = document.getElementById('starget');
   const scoreForm = document.getElementById('scoreForm');
@@ -33,7 +34,7 @@
     const rawTotal = scores.reduce((a,b)=>a+b,0);
     const percent = (weightedSum / (weightTotal * 10)) * 100;
     const starget = Number(stargetInput.value) || 0;
-    if(!(starget > 0)) return {error:'請輸入有效的目標總分 (Starget > 0)'};
+    if(!(starget > 0)) return {error:'請輸入有效的目標總分 (Starget > 0)'} ;
     const finalScore = (percent/100) * starget;
     return {rawTotal, rawMax, percent, finalScore, starget};
   }
@@ -107,6 +108,7 @@
     }
   });
 
+  // 生成評語（正向、鼓勵）
   function generateComment(){
     const res = compute();
     if(!res) return '請先完整填寫分數與 Starget。';
@@ -116,22 +118,24 @@
     const advantages = Array.from(document.querySelectorAll('.tag.advantage:checked')).map(n=>n.value);
     const weaknesses = Array.from(document.querySelectorAll('.tag.weakness:checked')).map(n=>n.value);
 
+    // 溫和提醒同時選取相同標籤
     const conflicts = advantages.filter(a => weaknesses.includes(a));
     let conflictNote = '';
     if(conflicts.length){
-      conflictNote = '（注意：同時選到相同標籤 ' + conflicts.join('、') + '，建議檢查是否為誤選。）\n';
+      conflictNote = '（提醒：您同時勾選了 ' + conflicts.join('、') + '，若為刻意強調可保留；若非預期，可考慮調整。）\n';
     }
 
+    // 開頭（正向）
     const p = res.percent;
     let opening = '';
     if(p > 85){
-      opening = '本篇報告展現了極高的專業水準與用心，架構流暢且重點突出，不僅清楚交代了年度成果，更帶入了具有深度的反思，是非常優秀的示範。';
+      opening = '整體表現非常出色，展現了高度的專業與用心，成果與論述都具有說服力，值得肯定。';
     } else if(p >= 70){
-      opening = '整體表現相當穩健，核心任務與架構皆有很好的發揮，文字與視覺呈現也符合專業期待。';
+      opening = '整體表現穩健且有亮點，目前已具備良好基礎，經過些微調整便能更上一層樓。';
     } else if(p >= 55){
-      opening = '感謝您的用心準備。報告中可以看出基本的工作投入，但在條理安排與邏輯推導上還有提升空間。';
+      opening = '您做了紮實的準備，報告已具備基礎架構與內容；若再補強幾處重點，說服力會顯著提升。';
     } else {
-      opening = '這是一份有潛力進一步打磨的報告。目前在資訊呈現的脈絡與深度上較為發散，建議可再聚焦與精簡。';
+      opening = '這份報告有明顯的成長潛力，透過聚焦重點與補足佐證，可以快速看到提升效果，我很期待後續的改進成果。';
     }
 
     const {scores} = getScoresAndWeights();
@@ -146,44 +150,45 @@
       if(advantagesList.length) strengths = '優勢：' + advantagesList.join('、') + '。';
       let suggestions = '';
       if(weaknessesList.length){
-        suggestions = '建議重點（自動/選取）：建議可針對 ' + weaknessesList.join('、') + ' 加強，並加入量化指標或案例以驗證推論。';
+        suggestions = '建議重點（自動/選取）：建議可針對 ' + weaknessesList.join('、') + ' 加強，並考慮加入量化指標或具體案例來支援論點。';
       } else {
-        suggestions = '若希望進一步提升，可在論述中增加更多具體數據與可衡量指標。';
+        suggestions = '若希望更進一步提升，可以在論述中增加具體數據與可衡量指標，讓成果更具說服力。';
       }
-      const footer = `總結：目前折算後得分為 ${res.finalScore.toFixed(2)} / ${res.starget}（${res.percent.toFixed(2)}%）。期許新的一年繼續保持熱忱，持續精進。`;
+      const footer = `總結：目前折算後得分為 ${res.finalScore.toFixed(2)} / ${res.starget}（${res.percent.toFixed(2)}%）。期待未來持續成長與精進。`;
       return [conflictNote, opening, strengths, suggestions, footer].filter(Boolean).join('\n\n');
     }
 
+    // 用心版：針對每個構面提供肯定 + 建設性建議
     function bandText(score, criterionKey){
       const band = score >= 9 ? '9-10' : (score >=7 ? '7-8' : (score >=5 ? '5-6' : (score >=3 ? '3-4' : '1-2')));
       const templates = {
         '條理與架構': {
-          '9-10': `條理與架構方面表現優異（${score} 分）：結構清楚且段落過渡自然，讀者可迅速抓到重點。`,
-          '7-8': `條理與架構（${score} 分）：整體脈絡清楚，建議微調部分段落或刪減次要內容以更聚焦。`,
-          '5-6': `條理與架構（${score} 分）：可理解但若要更有力度，建議在每個段落加一個明確主題句並強化過渡句。`,
-          '3-4': `條理與架構（${score} 分）：架構較散或有重複，建議先列出 3 個核心訊息並以金字塔結構重組內容。`,
-          '1-2': `條理與架構（${score} 分）：目前缺乏清晰脈絡，建議重做整體架構設計，先釐清核心訴求再重排內容。`
+          '9-10': `條理與架構（${score} 分）：表現穩健，脈絡明確，讀者能迅速抓到重點；建議可維持目前結構並在關鍵處加強小結，讓訊息更銜接流暢。`,
+          '7-8': `條理與架構（${score} 分）：整體清晰且具邏輯，建議微調段落順序或刪減次要內容，以讓主訊息更為突出。`,
+          '5-6': `條理與架構（${score} 分）：基本可理解，建議為每段加上明確主題句並強化過渡句，能更快速引導聽眾掌握重點。`,
+          '3-4': `條理與架構（${score} 分）：目前有些內容較為分散，建議先釐清 2–3 個核心訊息，採用金字塔結構重整，以提升整體聚焦度。`,
+          '1-2': `條理與架構（${score} 分）：尚未形成清晰脈絡，建議先定義核心訴求並重排內容順序，這樣能更有效傳遞主旨。`
         },
         '邏輯與說服力': {
-          '9-10': `邏輯與說服力（${score} 分）：論證紮實、因果關係明確，數據與案例有效支持結論。`,
-          '7-8': `邏輯與說服力（${score} 分）：論點合理且多數證據支持，建議在個別主張中補入更精確的數據來源。`,
-          '5-6': `邏輯與說服力（${score} 分）：基本論述存在，但某些推論尚需更多證據或更清楚的因果鏈。`,
-          '3-4': `邏輯與說服力（${score} 分）：推論出現跳接或以主觀敘述取代證據，建議檢視主要假設並補入佐證。`,
-          '1-2': `邏輯與說服力（${score} 分）：缺乏論證基礎，建議重新定義問題、提出假設並以數據或案例逐步驗證。`
+          '9-10': `邏輯與說服力（${score} 分）：推論清楚並有充分佐證，呈現方式有助於說服決策者；可考慮補充來源或比較數據以更完整呈現影響力。`,
+          '7-8': `邏輯與說服力（${score} 分）：論點合理且多數有支持，建議在關鍵假設處補入更精確的數據或說明，以增加信服度。`,
+          '5-6': `邏輯與說服力（${score} 分）：已具基本論述，若在關鍵結論處補充佐證或以範例示範，整體說服力會更強。`,
+          '3-4': `邏輯與說服力（${score} 分）：部分推論尚需更明確的證據，建議檢視主要假設並補入可驗證的數據或案例。`,
+          '1-2': `邏輯與說服力（${score} 分）：目前論證基礎較弱，建議先建立清楚的問題定義與衡量指標，逐步以數據驗證主張。`
         },
         '內容深度與價值': {
-          '9-10': `內容深度（${score} 分）：洞察深刻且具體，提供可量化成果與可執行建議，對決策有實質參考價值。`,
-          '7-8': `內容深度（${score} 分）：內容完整且具有實務價值，建議補入更多分析結果或延伸指標以加強說服力。`,
-          '5-6': `內容深度（${score} 分）：有基本成果但分析深度不足，建議補充案例細節或更多衡量指標。`,
-          '3-4': `內容深度（${score} 分）：偏向敘事或流水帳，缺少深度分析與可衡量成果，建議加入具體數據與結論。`,
-          '1-2': `內容深度（${score} 分）：內容空泛，需補足事實與數據並重構分析流程，才能呈現價值。`
+          '9-10': `內容深度（${score} 分）：洞察深刻且具體，提出的建議具有可執行性，對團隊或決策有實際幫助，值得肯定。`,
+          '7-8': `內容深度（${score} 分）：內容完整且有實務價值，建議補入延伸指標或後續規劃以便落地執行。`,
+          '5-6': `內容深度（${score} 分）：成果與描述已具基礎，若補充更多數據或案例分析，將能呈現更豐富的洞見。`,
+          '3-4': `內容深度（${score} 分）：目前以敘事為主，建議加入具體成果指標或短期成效量測，讓內容更具說服力。`,
+          '1-2': `內容深度（${score} 分）：內容需要補足實證或案例支撐，建議蒐集關鍵指標並以圖表呈現核心成果。`
         },
         '視覺與表達呈現': {
-          '9-10': `視覺與表達（${score} 分）：排版與圖表專業、資訊層次清晰，閱讀體驗佳，數據標示完整。`,
-          '7-8': `視覺與表達（${score} 分）：整體呈現良好，建議微調字級或對比以提升可讀性。`,
-          '5-6': `視覺與表達（${score} 分）：資訊密度較高或圖表需簡化，建議把每張投影片聚焦一個重點。`,
-          '3-4': `視覺與表達（${score} 分）：設計較為混亂或圖表標示不足，建議統一版式並重作主要圖表。`,
-          '1-2': `視覺與表達（${score} 分）：視覺表達欠佳，需從版面、字級與配色重新設計以確保資訊可讀。`
+          '9-10': `視覺與表達（${score} 分）：視覺呈現專業且資訊層次清晰，能有效傳達重點，建議維持一致風格以強化辨識度。`,
+          '7-8': `視覺與表達（${score} 分）：整體呈現良好，建議微調字級、對比或圖表標示，能進一步提升可讀性。`,
+          '5-6': `視覺與表達（${score} 分）：資訊密度較高或圖表需簡化，建議將每張投影片聚焦一個重點並減少文字量。`,
+          '3-4': `視覺與表達（${score} 分）：目前設計有改善空間，建議統一版式與色彩並重新標註圖表重點，使資訊更易理解。`,
+          '1-2': `視覺與表達（${score} 分）：建議從版面與字級重新規劃，先確保資訊可讀再逐步優化視覺風格。`
         }
       };
       return templates[criterionKey][band];
@@ -191,8 +196,8 @@
 
     const perCriterion = labels.map((label,i)=> bandText(scores[i], label));
     const strengths = advantagesList.length ? '優勢（自動/選取）：' + advantagesList.join('、') + '。' : '';
-    const suggestions = weaknessesList.length ? '建議重點（自動/選取）：建議可針對 ' + weaknessesList.join('、') + ' 加強，並加入量化指標或案例以驗證推論。' : '若希望進一步提升，可在論述中加入更多具體數據與可衡量指標。';
-    const footer = `總結：折算後得分 ${res.finalScore.toFixed(2)} / ${res.starget}（${res.percent.toFixed(2)}%）。期望持續精進。`;
+    const suggestions = weaknessesList.length ? '建議重點（自動/選取）：建議可針對 ' + weaknessesList.join('、') + ' 加強，並考慮加入量化指標或具體案例以驗證論點。' : '若希望進一步提升，可以在論述中加入更多具體數據與可衡量指標，讓成果更具說服力。';
+    const footer = `總結：折算後得分 ${res.finalScore.toFixed(2)} / ${res.starget}（${res.percent.toFixed(2)}%）。期待看到後續精進成果。`;
 
     return [conflictNote, opening, ...perCriterion, strengths, suggestions, footer].filter(Boolean).join('\n\n');
   }
@@ -215,4 +220,5 @@
   });
 
   renderCompute();
+
 })();
