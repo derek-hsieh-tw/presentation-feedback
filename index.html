@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>簡報評分與評語生成系統 (靜態範例)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>簡報評分與評語生成系統（靜態範例）</h1>
+
+    <section class="card">
+      <h2>步驟一：設定目標總分</h2>
+      <label>期望總分上限 (Starget)：
+        <input id="starget" type="number" value="75" min="1" step="1" />
+      </label>
+    </section>
+
+    <section class="card">
+      <h2>步驟二：各項評分 (1–10 分)</h2>
+      <form id="scoreForm">
+        <div class="row">
+          <label>1. 條理與架構：
+            <input type="number" name="score" min="1" max="10" value="8" step="1" />
+            權重：
+            <input class="weight" type="number" min="0" step="0.1" value="1" />
+          </label>
+          <button type="button" class="toggle-criteria" data-target="crit-structure" aria-expanded="true">收合說明</button>
+          <div id="crit-structure" class="criteria">
+            <strong>條理與架構（Structure & Organization）</strong>
+            <ol>
+              <li><strong>9–10 分</strong>：架構非常清晰，開頭/主體/結論分明，段落過渡自然、層次分明。</li>
+              <li><strong>7–8 分</strong>：整體清楚，個別段落可微調或精簡。</li>
+              <li><strong>5–6 分</strong>：基本可理解，但有若干段落主旨不突出或過渡略突兀。</li>
+              <li><strong>3–4 分</strong>：架構散亂或重複，缺乏明確開場或結論。</li>
+              <li><strong>1–2 分</strong>：無明顯結構，需重做整體脈絡設計。</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="row">
+          <label>2. 邏輯與說服力：
+            <input type="number" name="score" min="1" max="10" value="6" step="1" />
+            權重：
+            <input class="weight" type="number" min="0" step="0.1" value="1" />
+          </label>
+          <button type="button" class="toggle-criteria" data-target="crit-logic" aria-expanded="true">收合說明</button>
+          <div id="crit-logic" class="criteria">
+            <strong>邏輯與說服力（Logic & Persuasiveness）</strong>
+            <ol>
+              <li><strong>9–10 分</strong>：論點明確、推論嚴謹，有充足數據或證據支撐，反駁或不足處有回應。</li>
+              <li><strong>7–8 分</strong>：論點合理且多數證據支援，細節可再強化。</li>
+              <li><strong>5–6 分</strong>：有基本論述與佐證，但推論有跳接或證據不足。</li>
+              <li><strong>3–4 分</strong>：推論不明或以主觀描述代替數據，邏輯鏈斷裂。</li>
+              <li><strong>1–2 分</strong>：缺乏論證基礎，需重建論證方式。</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="row">
+          <label>3. 內容深度與價值：
+            <input type="number" name="score" min="1" max="10" value="8" step="1" />
+            權重：
+            <input class="weight" type="number" min="0" step="0.1" value="1" />
+          </label>
+          <button type="button" class="toggle-criteria" data-target="crit-content" aria-expanded="true">收合說明</button>
+          <div id="crit-content" class="criteria">
+            <strong>內容深度與價值（Content Depth & Value）</strong>
+            <ol>
+              <li><strong>9–10 分</strong>：具洞察性與具體成果，含量化指標或可執行建議，具有實務價值或創新性。</li>
+              <li><strong>7–8 分</strong>：內容完整且有深度，個別分析可更深入或補充指標。</li>
+              <li><strong>5–6 分</strong>：提供基本成果，但缺少深度分析或洞見不足。</li>
+              <li><strong>3–4 分</strong>：主要停留在表層敘述或流水帳，缺少可衡量的價值。</li>
+              <li><strong>1–2 分</strong>：內容空泛，缺乏實質成果或分析。</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="row">
+          <label>4. 視覺與表達呈現：
+            <input type="number" name="score" min="1" max="10" value="8" step="1" />
+            權重：
+            <input class="weight" type="number" min="0" step="0.1" value="1" />
+          </label>
+          <button type="button" class="toggle-criteria" data-target="crit-visual" aria-expanded="true">收合說明</button>
+          <div id="crit-visual" class="criteria">
+            <strong>視覺與表達呈現（Visual & Presentation）</strong>
+            <ol>
+              <li><strong>9–10 分</strong>：排版專業、圖表清楚、語言簡潔，視覺層次分明，數據可讀性高。</li>
+              <li><strong>7–8 分</strong>：整潔且專業，多數圖表可讀，個別微調可改善。</li>
+              <li><strong>5–6 分</strong>：排版或資訊密度需優化，部分圖表需重製以提高可讀性。</li>
+              <li><strong>3–4 分</strong>：設計混亂或不一致，圖表標示不足或文字過多導致視覺負擔。</li>
+              <li><strong>1–2 分</strong>：視覺表達極差，圖表無法傳達資訊，需全面重設。</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="computed" id="computed">
+          原始總分：<span id="rawTotal">-</span> / <span id="rawMax">-</span>
+          （百分比：<span id="percent">-</span>%）
+          折算後得分：<span id="finalScore">-</span> / <span id="stargetShow">-</span>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>步驟三：關鍵字 / 標籤</h2>
+      <div class="tags-col">
+        <div>
+          <h3>優勢關鍵字</h3>
+          <label><input type="checkbox" class="tag advantage" value="數據扎實" /> 數據扎實</label>
+          <label><input type="checkbox" class="tag advantage" value="架構清晰" /> 架構清晰</label>
+          <label><input type="checkbox" class="tag advantage" value="亮點突出" /> 亮點突出</label>
+          <label><input type="checkbox" class="tag advantage" value="圖表精美" /> 圖表精美</label>
+          <label><input type="checkbox" class="tag advantage" value="思維周全" /> 思維周全</label>
+        </div>
+        <div>
+          <h3>待加強關鍵字</h3>
+          <label><input type="checkbox" class="tag weakness" value="字數稍多" /> 字數稍多</label>
+          <label><input type="checkbox" class="tag weakness" value="數據佐證稍弱" /> 數據佐證稍弱</label>
+          <label><input type="checkbox" class="tag weakness" value="架構可再精簡" /> 架構可再精簡</label>
+          <label><input type="checkbox" class="tag weakness" value="多點實質反思" /> 多點實質反思</label>
+        </div>
+      </div>
+
+      <div class="add-tag">
+        <input id="newTagText" placeholder="輸入自訂標籤（按 Enter 新增）" />
+        <select id="newTagType">
+          <option value="advantage">優勢</option>
+          <option value="weakness">待加強</option>
+        </select>
+        <button id="addTagBtn">新增</button>
+      </div>
+    </section>
+
+    <section class="card actions">
+      <div class="radio-group">
+        <label><input type="radio" name="commentMode" value="concise" checked /> 簡潔版</label>
+        <label><input type="radio" name="commentMode" value="detailed" /> 用心版（詳細）</label>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:8px">
+        <button id="generateBtn">一鍵產生評語</button>
+        <button id="copyBtn">複製評語到剪貼簿</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>生成結果預覽</h2>
+      <div id="commentPreview" class="preview">尚未建立評語，請先輸入評分並按「一鍵產生評語」。</div>
+    </section>
+
+    <footer class="note">
+      範例靜態頁面 — 若要我幫你把檔案推到 GitHub repo 並啟用 Pages，請回覆 repository 的 owner/name 或允許我建立新 repo。
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
